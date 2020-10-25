@@ -49,6 +49,8 @@ class Base_Target():
         self.radius = randint(15, 25)
         self.speed = randint(5, min([20, self.maxspeed]))
         self.direction = randint(-180, 180)
+        if(type(self) == Ball):
+            self.color = (randint(50, 255), randint(50, 255), randint(50, 255))
     
     def status(self):
         return self.alive		
@@ -108,18 +110,11 @@ class Square(Base_Target):
     
 FPS = 30
 canvas = pygame.display.set_mode((1200, 900))
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-GREEN = (0, 255, 0)
-MAGENTA = (255, 0, 255)
-CYAN = (0, 255, 255)
-BLACK = (0, 0, 0)
-COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+red = (255, 0 , 0)
+black = (0, 0, 0)
 pygame.display.update()
 clock = pygame.time.Clock()
 finished = False
-color = COLORS[randint(0, 5)]
 score = 0
 time = 0
 time1 = 0
@@ -133,17 +128,24 @@ for i in range(20):
      
 square = Square(canvas)
      
-pygame.draw.line(canvas, RED, (100, 100), (1100, 100), 10)
-pygame.draw.line(canvas, RED,  (1100, 100), (1100, 800), 10)
-pygame.draw.line(canvas, RED, (1100, 800), (100, 800), 10)
-pygame.draw.line(canvas, RED, (100, 800), (100, 100), 10)
+pygame.draw.line(canvas, red, (100, 100), (1100, 100), 10)
+pygame.draw.line(canvas, red,  (1100, 100), (1100, 800), 10)
+pygame.draw.line(canvas, red, (1100, 800), (100, 800), 10)
+pygame.draw.line(canvas, red, (100, 800), (100, 100), 10)
+
+font_start = pygame.font.SysFont(None, 60)
+text_start = font_start.render('To start enter your nickname in console', True, [255, 255, 255])
+canvas.blit(text_start, [200, 400] )
+pygame.display.update()
+nickname = input('enter your nickname ')
+pygame.draw.line(canvas, black, (100, 400), (1100, 400), 150)
+
 while not finished:
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print('Click!')
             for ball in balls:
                 if (ball.status):
                     x, y = event.pos
@@ -155,16 +157,16 @@ while not finished:
                     score += 10
                         
     text = font.render('Score:' + str(score), True, [255, 255, 255])
-    pygame.draw.line(canvas, BLACK, (0, 0), (1100, 0), 150)
+    pygame.draw.line(canvas, black, (0, 0), (1100, 0), 150)
     canvas.blit(text, [480, 0] )
     
     square.move()    
     for ball in balls:
         ball.move()
-    pygame.draw.line(canvas, RED, (100, 100), (1100, 100), 10)
-    pygame.draw.line(canvas, RED,  (1100, 100), (1100, 800), 10)
-    pygame.draw.line(canvas, RED, (1100, 800), (100, 800), 10)
-    pygame.draw.line(canvas, RED, (100, 800), (100, 100), 10)
+    pygame.draw.line(canvas, red, (100, 100), (1100, 100), 10)
+    pygame.draw.line(canvas, red,  (1100, 100), (1100, 800), 10)
+    pygame.draw.line(canvas, red, (1100, 800), (100, 800), 10)
+    pygame.draw.line(canvas, red, (100, 800), (100, 100), 10)
     pygame.display.update()
     if(time > 30):
         flag = True
@@ -185,5 +187,30 @@ while not finished:
                 flag1 = False
         time1 = 0
     time += 1
-    time1 += 1    
+    time1 += 1
+
+with open('results_table.txt', 'r') as table:
+    score_list = table.readlines()
+flag = True
+for player_number in range(len(score_list)):
+    score_list[player_number] = score_list[player_number].rstrip()
+    score_list[player_number] = score_list[player_number].split(':')
+for player in score_list:
+    if(player[0] == nickname):
+        flag1 = 0
+        flag = False
+        if(int(player[1]) < score):
+            player[1] = str(score)
+if flag:
+    for i in range(len(score_list)):
+        if(int(score_list[i][1]) < score and flag):
+            score_list.insert(i, (nickname, str(score)))
+            flag = False 
+
+with open('results_table.txt', 'w') as table:
+	for i in range(len(score_list)):
+		print(score_list[i][0] + ':' + score_list[i][1], file = table)
+		
+
+
 pygame.quit()
